@@ -1,0 +1,61 @@
+diff --git a/include/zephyr/lorawan/lorawan.h b/include/zephyr/lorawan/lorawan.h
+index 21df1ceb28d..7eaf6a61dfa 100644
+--- a/include/zephyr/lorawan/lorawan.h
++++ b/include/zephyr/lorawan/lorawan.h
+@@ -294,6 +294,12 @@ void lorawan_register_link_check_ans_callback(lorawan_link_check_ans_cb_t cb);
+  */
+ int lorawan_join(const struct lorawan_join_config *config);
+ 
++
++
++
++void lorawan_cert_test_disable_dutycycle(bool val);
++
++
+ /**
+  * @brief Start the LoRaWAN stack
+  *
+diff --git a/subsys/lorawan/Kconfig b/subsys/lorawan/Kconfig
+index 5889f577f96..bb95ff4d383 100644
+--- a/subsys/lorawan/Kconfig
++++ b/subsys/lorawan/Kconfig
+@@ -37,6 +37,14 @@ config LORAWAN_SYSTEM_MAX_RX_ERROR
+ 	  System Max Rx timing error value in ms to be used by LoRaWAN stack
+ 	  for calculating the RX1/RX2 window timing.
+ 
++config LORAWAN_SYSTEM_MIN_RX_SYMBOLS
++	int "LoRaWAN System Min Rx Symbols"
++	default 6
++	help
++	  System Min Rx symbols error value in ms to be used by LoRaWAN stack
++	  for calculating the RX1/RX2 window timeout.
++
++
+ config LORAWAN_PUBLIC_NETWORK
+ 	bool "LoRaWAN Public Network"
+ 	default y
+diff --git a/subsys/lorawan/lorawan.c b/subsys/lorawan/lorawan.c
+index 5a55281d086..f831560074a 100644
+--- a/subsys/lorawan/lorawan.c
++++ b/subsys/lorawan/lorawan.c
+@@ -11,7 +11,9 @@
+ 
+ #include "lw_priv.h"
+ 
++
+ #include <LoRaMac.h>
++#include <LoRaMacTest.h>
+ #include <Region.h>
+ #include "nvm/lorawan_nvm.h"
+ 
+@@ -761,6 +763,10 @@ void lorawan_register_link_check_ans_callback(lorawan_link_check_ans_cb_t cb)
+ 	link_check_cb = cb;
+ }
+ 
++void lorawan_cert_test_disable_dutycycle(bool val) {
++	LoRaMacTestSetDutyCycleOn(val);
++}
++
+ int lorawan_start(void)
+ {
+ 	LoRaMacStatus_t status;
